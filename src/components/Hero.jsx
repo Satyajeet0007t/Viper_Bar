@@ -52,8 +52,8 @@ const Hero = () => {
 
     const video = videoRef.current;
     if (!video) return;
-    const startValue = isMobile ? "top 50%" : "center 60%";
-    const endValue = isMobile ? "120% top" : "bottom top";
+    const startValue = isMobile ? "top 80%" : "center 60%";
+    const endValue = isMobile ? "bottom 20%" : "bottom top";
 
     let tl = gsap.timeline({
       scrollTrigger: {
@@ -63,14 +63,22 @@ const Hero = () => {
         scrub: isMobile ? 1.5 : 0.5,
         pin: !isMobile,
         anticipatePin: 1,
+        invalidateOnRefresh: true,
       },
     });
 
-    videoRef.current.onloadedmetadata = () => {
-      tl.to(videoRef.current, {
-        currentTime: videoRef.current.duration,
+    const initVideoAnimation = () => {
+      tl.to(video, {
+        currentTime: video.duration || 1,
+        ease: "none", // UPDATE 6: Added ease: "none" (without this, GSAP uses default power1.out easing which causes non-linear frame jumping)
       });
     };
+
+    if (video.readyState >= 1) {
+      initVideoAnimation();
+    } else {
+      video.onloadedmetadata = initVideoAnimation;
+    }
   }, []);
 
   return (
